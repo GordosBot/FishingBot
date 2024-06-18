@@ -4,8 +4,11 @@ import net.botwithus.api.game.hud.inventories.Backpack;
 import net.botwithus.internal.scripts.ScriptDefinition;
 import net.botwithus.rs3.game.Client;
 import net.botwithus.rs3.game.hud.interfaces.Interfaces;
-import net.botwithus.rs3.game.queries.builders.objects.SceneObjectQuery;
+import net.botwithus.rs3.game.scene.entities.characters.player.Player;
+import net.botwithus.rs3.game.scene.entities.characters.npc.Npc;
 import net.botwithus.rs3.game.scene.entities.characters.player.LocalPlayer;
+import net.botwithus.rs3.game.queries.builders.characters.NpcQuery;
+import net.botwithus.rs3.game.queries.builders.objects.SceneObjectQuery;
 import net.botwithus.rs3.game.scene.entities.object.SceneObject;
 import net.botwithus.rs3.imgui.NativeBoolean;
 import net.botwithus.rs3.imgui.NativeInteger;
@@ -19,17 +22,17 @@ public class SkeletonScript extends LoopingScript {
 
     private BotState botState = BotState.IDLE;
     private boolean someBool = true;
-    private Random random = new Random();
+    private Random rand = new Random();
     public Long startTime;
     public NativeBoolean debugMode = new NativeBoolean(false);
     public NativeInteger fishType = new NativeInteger(0);
     public NativeInteger selectedArea = new NativeInteger(0);
+    private int animationDeadCount = 0;
 
     enum BotState {
         IDLE,
         FISHING,
         BANKING,
-        //...
     }
 
     public SkeletonScript(String s, ScriptConfig scriptConfig, ScriptDefinition scriptDefinition) {
@@ -43,42 +46,59 @@ public class SkeletonScript extends LoopingScript {
     public void onLoop() {
         LocalPlayer player = Client.getLocalPlayer();
         if (player == null || Client.getGameState() != Client.GameState.LOGGED_IN || botState == BotState.IDLE) {
-            Execution.delay(random.nextLong(3000,7000));
+            Execution.delay(rand.nextLong(3000,7000));
             return;
         }
         switch (botState) {
             case IDLE -> {
-                println("We're idle!");
-                Execution.delay(random.nextLong(1000,3000));
+                Execution.delay(rand.nextLong(1000,3000));
             }
             case FISHING -> {
                 Execution.delay(handleFishing(player));
             }
             case BANKING -> {
-                println("We're banking!");
+                Execution.delay(handleBanking(player));
             }
         }
     }
 
     private long handleFishing(LocalPlayer player) {
-        println("Starting fishing!");
-        if (Interfaces.isOpen(1251)) {
-            println("Waiting for fishing progress! 1251 interface is open.");
-            return random.nextLong(250, 1500);
+        if (player.getAnimationId() != -1 || player.isMoving())
+            animationDeadCount = 0;
+        if (player.getAnimationId() == -1 && animationDeadCount > 2) {
+            animationDeadCount = 0;
+        } else {
+            animationDeadCount++;
+            return rand.nextInt(450, 710);
         }
-        //if our inventory is full, lets bank.
         if (Backpack.isFull()) {
-            println("Going to banking state!");
+            println("Inventory is Full! Going to banking");
             botState = BotState.BANKING;
-            return random.nextLong(250,1500);
+            return rand.nextInt(1743, 4786);
         }
-        //click my tree, mine my rock, etc...
-        SceneObject fishingSpot = SceneObjectQuery.newQuery().name("Fish").option("Net").results().nearest();
-        println("Found fishing spot: " + fishingSpot);
-        if (fishingSpot != null) {
-            fishingSpot.interact("Net");
+        SimulateRandomAfk();
+        Npc fishingSpot = NpcQuery.newQuery().name("Fishing spot").results().nearest();
+        if (fishingSpot != null)
+            println("interacted fishing spot: " + fishingSpot.interact("Net"));
+
+        return rand.nextLong(1765, 2875);
+    }
+
+    private int handleBanking(LocalPlayer player) {
+        if (player.getAnimationId() != -1 || player.isMoving())
+            return rand.nextInt(1250, 3425);
+        SimulateRandomAfk();
+        if (Backpack.isFull()) {
+            println("Banking!");
+            SceneObject bank = SceneObjectQuery.newQuery().name("Deposit box").option("Deposit-All").results().nearest();
+            println("Bank: " + bank);
+            if (bank != null) {
+                println("Interacted bank: " + bank.interact("Deposit-All"));
+            }
+        } else {
+            botState = BotState.FISHING;
         }
-        return random.nextLong(1500,3000);
+        return rand.nextInt(945, 1668);
     }
 
     public BotState getBotState() {
@@ -89,12 +109,16 @@ public class SkeletonScript extends LoopingScript {
         this.botState = botState;
     }
 
-    public boolean isSomeBool() {
-        return someBool;
-    }
-
-    public void setSomeBool(boolean someBool) {
-        this.someBool = someBool;
+    public void SimulateRandomAfk() {
+        double random = rand.nextDouble();
+        if (random * 100.0 > 97) {
+            int milliSeconds = rand.nextInt(5000, 25000);
+            if (rand.nextDouble() * 100 < 0.5)
+                milliSeconds += rand.nextInt(15000, 50000);
+            println("Unlucky 3% roll! Simulating human afk for " + milliSeconds / 1000
+                    + " seconds.");
+            delay(milliSeconds);
+        }
     }
 
     void saveConfiguration() {

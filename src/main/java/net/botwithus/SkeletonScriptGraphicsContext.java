@@ -53,6 +53,15 @@ public class SkeletonScriptGraphicsContext extends ScriptGraphicsContext {
                     long hours = elapsedTime / (1000 * 60 * 60) % 24;
                     ImGui.Text(String.format("Runtime: %02d:%02d:%02d%n", hours, minutes, seconds));
                     ImGui.Text("Level: " + Skills.FISHING.getActualLevel());
+                    ImGui.Text("Levels gained: " + script.levelsGained);
+                    ImGui.Text("ETA: %s", script.eta);
+                    ImGui.Separator();
+                    ImGui.Text("Xp gained: %,d", script.xpGained);
+                    ImGui.Text("Xp per hour: %,d", script.xpPerHour);
+                    ImGui.Separator();
+                    ImGui.Text("Total fish caught: " + script.totalFishCaught);
+                    ImGui.Text("Total fish caught per hour: %,d", script.totalFishCaughtPerHour);
+                    ImGui.EndTabItem();
                     ImGui.EndTabItem();
                 }
                 ImGui.EndTabBar();

@@ -70,7 +70,7 @@ public class SkeletonScript extends LoopingScript {
     public void onLoop() {
         LocalPlayer player = Client.getLocalPlayer();
         if (player == null || Client.getGameState() != Client.GameState.LOGGED_IN || botState == BotState.IDLE) {
-            Execution.delay(rand.nextLong(3000,7000));
+            delay(5000);
             return;
         }
         updateStats();

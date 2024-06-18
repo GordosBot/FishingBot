@@ -24,16 +24,17 @@ public class SkeletonScriptGraphicsContext extends ScriptGraphicsContext {
                     ImGui.Text("Bot State: " + script.getBotState());
                     if (ImGui.Button("Start!")) {
                         script.setBotState(SkeletonScript.BotState.FISHING);
+                        script.saveConfiguration();
                     }
                     ImGui.SameLine();
                     if (ImGui.Button("Stop!")) {
                         script.setBotState(SkeletonScript.BotState.IDLE);
+                        script.saveConfiguration();
                     }
                     ImGui.SameLine();
                     script.debugMode.set(ImGui.Checkbox("Debug mode", script.debugMode.get()));
                     handleConfigChange();
 
-                    // Add a Combo to select the area
                     String[] areas = Fish.getAreas();
                     ImGui.Combo("Area", script.selectedArea, areas);
                     handleConfigChange();

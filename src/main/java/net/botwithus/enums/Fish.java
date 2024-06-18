@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 public enum Fish {
 
-    SHRIMP("Raw shrimps", "Draynor Village", Constants.NET, "", "00"),
-    SARDINE("Raw sardine", "Draynor Village", Constants.NET, "Fishing bait", "01"),
-    CRAYFISH("Raw crayfish", "Lumbridge", Constants.BAIT, "", "10"),
-    TROUT("Raw trout", "Lumbridge", Constants.BAIT, "Feather", "11");
+    SHRIMP("Raw shrimps", Constants.DRAYNOR_VILLAGE, Constants.NET, "", "00"),
+    SARDINE("Raw sardine", Constants.DRAYNOR_VILLAGE, Constants.NET, "Fishing bait", "01"),
+    CRAYFISH("Raw crayfish", Constants.LUMBRIDGE, Constants.CAGE, "", "10"),
+    TROUT("Raw trout", Constants.LUMBRIDGE, Constants.BAIT, "Feather", "11");
 
     private String npcName;
     private String area;

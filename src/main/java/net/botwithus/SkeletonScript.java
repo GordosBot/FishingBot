@@ -1,6 +1,9 @@
 package net.botwithus;
 
 import net.botwithus.api.game.hud.inventories.Backpack;
+import net.botwithus.api.game.hud.traversal.Lodestone;
+import net.botwithus.constans.Constants;
+import net.botwithus.enums.City;
 import net.botwithus.enums.Fish;
 import net.botwithus.internal.scripts.ScriptDefinition;
 import net.botwithus.rs3.events.impl.SkillUpdateEvent;
@@ -35,9 +38,7 @@ public class SkeletonScript extends LoopingScript {
 
 
     enum BotState {
-        IDLE,
-        FISHING,
-        BANKING,
+        IDLE, FISHING, BANKING,
     }
 
     public SkeletonScript(String s, ScriptConfig scriptConfig, ScriptDefinition scriptDefinition) {
@@ -89,8 +90,7 @@ public class SkeletonScript extends LoopingScript {
     }
 
     private long handleFishing(LocalPlayer player) {
-        if (player.getAnimationId() != -1 || player.isMoving())
-            animationDeadCount = 0;
+        if (player.getAnimationId() != -1 || player.isMoving()) animationDeadCount = 0;
         if (player.getAnimationId() == -1 && animationDeadCount > 2) {
             animationDeadCount = 0;
         } else {
@@ -104,8 +104,14 @@ public class SkeletonScript extends LoopingScript {
         }
         SimulateRandomAfk();
         try {
-            Fish fishAndArea = Fish.getByCode(String.valueOf(fishType.get()) + String.valueOf(selectedArea.get()));
+            Fish fishAndArea = Fish.getByCode(String.valueOf(selectedArea.get()) + String.valueOf(fishType.get()));
+            if (Lodestone.DRAYNOR_VILLAGE.isAvailable() && fishAndArea.getArea().equals(Constants.DRAYNOR_VILLAGE) && player.getCoordinate().getRegionId() != City.DRAYOR_VILLAGE.getRegionId()) {
+                Lodestone.DRAYNOR_VILLAGE.teleport();
+            }
 
+            if (Lodestone.LUMBRIDGE.isAvailable() && fishAndArea.getArea().equals(Constants.LUMBRIDGE) && player.getCoordinate().getRegionId() != City.LUMBRIDGE.getRegionId()) {
+                Lodestone.LUMBRIDGE.teleport();
+            }
             println(fishAndArea.getFishingMethod());
             Npc fishingSpot = NpcQuery.newQuery().name("Fishing spot").results().nearest();
             if (fishingSpot != null) {
@@ -120,8 +126,7 @@ public class SkeletonScript extends LoopingScript {
     }
 
     private int handleBanking(LocalPlayer player) {
-        if (player.getAnimationId() != -1 || player.isMoving())
-            return rand.nextInt(1250, 3425);
+        if (player.getAnimationId() != -1 || player.isMoving()) return rand.nextInt(1250, 3425);
         SimulateRandomAfk();
         if (Backpack.isFull()) {
             println("Banking!");
@@ -152,6 +157,7 @@ public class SkeletonScript extends LoopingScript {
         return botState;
     }
 
+
     public void setBotState(BotState botState) {
         this.botState = botState;
     }
@@ -160,10 +166,8 @@ public class SkeletonScript extends LoopingScript {
         double random = rand.nextDouble();
         if (random * 100.0 > 97) {
             int milliSeconds = rand.nextInt(5000, 25000);
-            if (rand.nextDouble() * 100 < 0.5)
-                milliSeconds += rand.nextInt(15000, 50000);
-            println("Unlucky 3% roll! Simulating human afk for " + milliSeconds / 1000
-                    + " seconds.");
+            if (rand.nextDouble() * 100 < 0.5) milliSeconds += rand.nextInt(15000, 50000);
+            println("Unlucky 3% roll! Simulating human afk for " + milliSeconds / 1000 + " seconds.");
             delay(milliSeconds);
         }
     }

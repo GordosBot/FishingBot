@@ -1,6 +1,7 @@
 package net.botwithus;
 
 import net.botwithus.api.game.hud.inventories.Backpack;
+import net.botwithus.enums.Fish;
 import net.botwithus.internal.scripts.ScriptDefinition;
 import net.botwithus.rs3.events.impl.SkillUpdateEvent;
 import net.botwithus.rs3.game.Client;
@@ -76,7 +77,7 @@ public class SkeletonScript extends LoopingScript {
         updateStats();
         switch (botState) {
             case IDLE -> {
-                Execution.delay(rand.nextLong(1000,3000));
+                Execution.delay(rand.nextLong(1000, 3000));
             }
             case FISHING -> {
                 Execution.delay(handleFishing(player));
@@ -102,11 +103,20 @@ public class SkeletonScript extends LoopingScript {
             return rand.nextInt(1743, 4786);
         }
         SimulateRandomAfk();
-        Npc fishingSpot = NpcQuery.newQuery().name("Fishing spot").results().nearest();
-        if (fishingSpot != null)
-            println("interacted fishing spot: " + fishingSpot.interact("Net"));
+        try {
+            Fish fishAndArea = Fish.getByCode(String.valueOf(fishType.get()) + String.valueOf(selectedArea.get()));
 
-        return rand.nextLong(1765, 2875);
+            println(fishAndArea.getFishingMethod());
+            Npc fishingSpot = NpcQuery.newQuery().name("Fishing spot").results().nearest();
+            if (fishingSpot != null) {
+                println("interacted fishing spot: " + fishingSpot.interact(fishAndArea.getFishingMethod()));
+            }
+
+            return rand.nextLong(1765, 2875);
+        } catch (Exception e) {
+            println(e.getMessage());
+            return rand.nextLong(1765, 2875);
+        }
     }
 
     private int handleBanking(LocalPlayer player) {

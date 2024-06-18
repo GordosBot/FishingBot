@@ -39,7 +39,6 @@ public class SkeletonScriptGraphicsContext extends ScriptGraphicsContext {
                     ImGui.Combo("Area", script.selectedArea, areas);
                     handleConfigChange();
 
-                    // Add a Combo to select the fish within the selected area
                     String selectedArea = areas[script.selectedArea.get()];
                     String[] fishesInArea = Fish.getFishesByArea(selectedArea);
                     ImGui.Combo("Fish", script.fishType, fishesInArea);
